@@ -1,6 +1,7 @@
 /.DS_Store
 /.settings/
 /.project
+/packages/
 .tmp_*
 .DS_Store
 /jQRangeSlider-min.js

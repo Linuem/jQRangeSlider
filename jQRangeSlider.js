@@ -1,3 +1,31 @@
+/* 2017-01-09 scams02 bugfix fuer das resizing */
+(function($,sr){
+
+    // debouncing function from John Hann
+    // http://unscriptable.com/index.php/2009/03/20/debouncing-javascript-methods/
+    var debounce = function (func, threshold, execAsap) {
+        var timeout;
+
+        return function debounced () {
+            var obj = this, args = arguments;
+            function delayed () {
+                if (!execAsap)
+                    func.apply(obj, args);
+                timeout = null;
+            };
+
+            if (timeout)
+                clearTimeout(timeout);
+            else if (execAsap)
+                func.apply(obj, args);
+
+            timeout = setTimeout(delayed, threshold || 100);
+        };
+    }
+    // smartresize
+    jQuery.fn[sr] = function(fn){  return fn ? this.bind('resize', debounce(fn)) : this.trigger(sr); };
+
+})(jQuery,'smartresize');
 /**
  * jQRangeSlider
  * A javascript slider selector that supports dates
@@ -75,7 +103,9 @@
 				that.resize(e);
 			};
 
-			$(window).resize(this._resizeProxy);
+         // 2017-01-09 scams02 bugfix fuer das resizing
+			//$(window).resize(this._resizeProxy);
+			$(window).smartresize(this._resizeProxy);
 		},
 
 		_initWidth: function(){
@@ -89,7 +119,7 @@
 		},
 
 		_setOption: function(key, value) {
-			this._setWheelOption(key, value);		
+			this._setWheelOption(key, value);
 			this._setArrowsOption(key, value);
 			this._setLabelsOption(key, value);
 			this._setLabelsDurations(key, value);
@@ -240,7 +270,7 @@
 			this.container = $("<div class='ui-rangeSlider-container' />")
 				.css("position", "absolute")
 				.appendTo(this.element);
-			
+
 			this.innerBar = $("<div class='ui-rangeSlider-innerBar' />")
 				.css("position", "absolute")
 				.css("top", 0)
@@ -276,7 +306,7 @@
 					step: this.options.step,
 					symmetricPositionning: this.options.symmetricPositionning
 			}).appendTo(this.container);
-	
+
 			this.rightHandle = this._createHandle({
 				isLeft: false,
 				bounds: this.options.bounds,
@@ -285,13 +315,13 @@
 				symmetricPositionning: this.options.symmetricPositionning
 			}).appendTo(this.container);
 		},
-		
+
 		_createBar: function(){
 			this.bar = $("<div />")
 				.prependTo(this.container)
 				.bind("sliderDrag scroll zoom", $.proxy(this._changing, this))
 				.bind("stop", $.proxy(this._changed, this));
-			
+
 			this._bar({
 					leftHandle: this.leftHandle,
 					rightHandle: this.rightHandle,
@@ -344,7 +374,7 @@
 			var array = Array.prototype.slice.call(args);
 
 			if (element && element[type]){
-				return element[type].apply(element, array);	
+				return element[type].apply(element, array);
 			}
 
 			return null;
@@ -383,10 +413,10 @@
 		},
 
 		_getValue: function(position, handle){
-			if (handle === this.rightHandle){	
+			if (handle === this.rightHandle){
 				position = position - handle.outerWidth();
 			}
-			
+
 			return position * (this.options.bounds.max - this.options.bounds.min) / (this.container.innerWidth() - handle.outerWidth(true)) + this.options.bounds.min;
 		},
 
@@ -431,7 +461,7 @@
 				this._trigger("valuesChanged");
 
 				if (isAutomatic !== true){
-					this._trigger("userValuesChanged");					
+					this._trigger("userValuesChanged");
 				}
 
 				this._valuesChanged = false;
@@ -569,11 +599,11 @@
 			this._scrollTimeout = setTimeout(function(){
 				if (timesBeforeSpeedingUp === 0){
 					if (timeout > minTimeout){
-						timeout = Math.max(minTimeout, timeout / 1.5);	
+						timeout = Math.max(minTimeout, timeout / 1.5);
 					} else {
 						quantity = Math.min(maxQuantity, quantity * 2);
 					}
-					
+
 					timesBeforeSpeedingUp = 5;
 				}
 
@@ -640,7 +670,7 @@
 			}
 
 			this._createRuler();
-			this._setRulerParameters();			
+			this._setRulerParameters();
 		},
 
 		/*
@@ -678,15 +708,15 @@
 
 			return this._values.max;
 		},
-		
+
 		bounds: function(min, max){
 			if (this._isValidValue(min) && this._isValidValue(max) && min < max){
-				
+
 				this._setBounds(min, max);
 				this._updateRuler();
 				this._changed(true);
 			}
-			
+
 			return this.options.bounds;
 		},
 
@@ -720,7 +750,7 @@
 			this._bar("scrollRight", quantity);
 			this._bar("stopScroll");
 		},
-		
+
 		/**
 		 * Resize
 		 */
@@ -773,7 +803,7 @@
 
 			this._destroyWidgets();
 			this._destroyElements();
-			
+
 			this.element.removeClass("ui-rangeSlider");
 			this.options = null;
 
